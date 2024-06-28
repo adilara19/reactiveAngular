@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, filter, of, map, catchError, tap} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -7,26 +7,46 @@ import { Observable } from 'rxjs';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  title = 'Reactive Angular';
+  baslik = 'Reactive Angular';
 
   title$ = new Observable((observable) => {
     setInterval(() => observable.next(), 1000);
     //Callback() sayesinde subscribe olan nesneleri denetlemek zorunda kalmadan eşzamanlı olarak gözlemleyebiliyoruz.
   }); //Observable olan nesnelere $ ile biten isimler veriyoruz. Yani sonunda $ varsa, observable olduğunu anlıyoruz.
 
-  constructor() {}
+  
+  constructor() {
 
   // Reactive js (Rxjs) kütüphanesi, bir nesne üzerinde yapılan değişikliklere subscribe olduktan sonra otomatik çağrı gönderen bir pattern'dir.
-  
 
-  start() {
-    this.title$.subscribe(() => {
-      let timeStamp = new Date().getSeconds();
-      this.title = 'Rxjs nedir? ' + timeStamp.toString();
-    });
+  this.title$.subscribe(() => {
+    let timeStamp = new Date().getSeconds();
+    this.baslik = 'Rxjs nedir? ' + timeStamp.toString();
+  });
+
+  const values = of(2, 3, 4, 8, 9, 10, 7);
+
+  values.pipe(
+    filter((x: any)=> x % 2 === 0),
+    map((m: any) => Math.pow(m,2)), // map ile koleksiyonu değiştirdik
+    catchError(err => { // catchError ile hata yakalayabiliriz
+      console.log(err);
+      return of('Bir hata oluştu, lütfen tekrar deneyin.' +err);
+    })
+  ).subscribe((data: any) => console.log(data), 
+              (err) => console.log(err),
+              () => console.log('İşlem Tamamlandı'));
+
+  // Observable koleksiyonumuzu arraydaki çift sayıların karesini getirecek şekilde manipüle etmeyi başardık.            
+}
+
+
+
+
+
   }
 
   // add(){
   //   console.log(this.title$.pipe(tap(x=>console.log(x))));
   // }
-}
+
